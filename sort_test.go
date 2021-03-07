@@ -28,7 +28,7 @@ func TestHeapSort(t *testing.T) {
 }
 
 func BenchmarkHeapSortRnd(b *testing.B) {
-	n := 1024 * 1024
+	n := 1024
 	a := randArray(n)
 	c := make([]int, n)
 	for i := 0; i < b.N; i++ {
@@ -38,7 +38,7 @@ func BenchmarkHeapSortRnd(b *testing.B) {
 }
 
 func BenchmarkStandartSortRnd(b *testing.B) {
-	n := 1024 * 1024
+	n := 1024
 	a := randArray(n)
 	c := make([]int, n)
 	for i := 0; i < b.N; i++ {
