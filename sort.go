@@ -16,19 +16,21 @@ func heapSort(a []int) {
 }
 
 func siftDown(a []int, i, n int) {
-	j := (i * 2) + 1
-	k := (j + 1)
+	j := i*2 + 1
+	k := j + 1
 	for j < n {
-		if (k < n) && (a[j] < a[k]) {
-			j++
-			k++
+		if j+1 < n {
+			if a[j] < a[k] {
+				j++
+				k++
+			}
 		}
 		if a[i] >= a[j] {
 			break
 		}
 		a[i], a[j] = a[j], a[i]
 		i = j
-		j = (i * 2) + 1
-		k = (j + 1)
+		j = i*2 + 1
+		k = j + 1
 	}
 }

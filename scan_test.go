@@ -79,6 +79,7 @@ func TestDedupNums(t *testing.T) {
 		t.Fail()
 	}
 	if !isEqual(dedupNums([]int{1, 2, 2, 3, 4, 4, 4}), []int{1, 2, 3, 4}) {
+		t.Log(dedupNums([]int{1, 2, 2, 3, 4, 4, 4}))
 		t.Fail()
 	}
 }

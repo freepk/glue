@@ -35,18 +35,18 @@ func scanNums(r []int, b []byte) ([]int, int) {
 
 func dedupNums(r []int) []int {
 	n := len(r)
+	if n < 2 {
+		return r
+	}
 	i := 0
-	j := 0
-	for i < n {
-		if (i + 1) < n {
-			if r[i] == r[i+1] {
-				i++
-				continue
-			}
+	j := 1
+	for j < n {
+		if r[i] != r[j] {
+			i++
+			r[i] = r[j]
 		}
-		r[j] = r[i]
-		i++
 		j++
 	}
-	return r[:j]
+	i++
+	return r[:i]
 }
