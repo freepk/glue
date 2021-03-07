@@ -1,39 +1,39 @@
 package main
 
 func heapSort(a []int) {
-	right := len(a)
-	if right < 2 {
+	hi := len(a)
+	if hi < 2 {
 		return
 	}
-	left := (right - 2) / 2
-	for left >= 0 {
-		siftDown(a, left, right)
-		left--
+	lo := (hi - 2) / 2
+	for lo >= 0 {
+		siftDown(a, lo, hi)
+		lo--
 	}
-	right--
-	for right > 0 {
-		a[0], a[right] = a[right], a[0]
-		siftDown(a, 0, right)
-		right--
+	hi--
+	for hi > 0 {
+		a[0], a[hi] = a[hi], a[0]
+		siftDown(a, 0, hi)
+		hi--
 	}
 }
 
-func siftDown(a []int, left, right int) {
-	curr := (left * 2) + 1
-	next := curr + 1
-	for curr < right {
-		if next < right {
-			if a[curr] < a[next] {
-				curr++
-				next++
+func siftDown(a []int, lo, hi int) {
+	pos := (lo * 2) + 1
+	ext := pos + 1
+	for pos < hi {
+		if ext < hi {
+			if a[pos] < a[ext] {
+				pos++
+				ext++
 			}
 		}
-		if a[left] >= a[curr] {
+		if a[lo] >= a[pos] {
 			return
 		}
-		a[left], a[curr] = a[curr], a[left]
-		left = curr
-		curr = (left * 2) + 1
-		next = curr + 1
+		a[lo], a[pos] = a[pos], a[lo]
+		lo = pos
+		pos = (lo * 2) + 1
+		ext = pos + 1
 	}
 }
