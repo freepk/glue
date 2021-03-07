@@ -17,16 +17,17 @@ func serviceHandler(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	items := make([]int, 0, 256)
-	items, scanLen := scanNums(items, buff)
+	items, scanLen := parseUints(items, buff)
 	if scanLen != buffLen {
 		return
 	}
 	heapSort(items)
+	items = dedupInts(items)
 	shards := make([]int, 0, 256)
 	for i := 0; i < len(items); i++ {
 		shards = append(shards, (items[i] / 1000000))
 	}
-	shards = dedupNums(shards)
+	shards = dedupInts(shards)
 }
 
 func main() {
