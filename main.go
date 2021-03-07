@@ -17,11 +17,13 @@ func serviceHandler(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	nums := make([]int, 0, 256)
+	// string.Split makes too many string allocations in heap
 	nums, scanLen := scanNums(nums, buf)
 	if scanLen != bufLen {
 		return
 	}
-	nums = heapSort(nums)
+	// sort.Ints provocate compilter escape nums to heap
+	heapSort(nums)
 	nums = dedupNums(nums)
 }
 

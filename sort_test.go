@@ -12,37 +12,37 @@ func init() {
 }
 
 func randArray(n int) []int {
-	data := make([]int, n)
+	a := make([]int, n)
 	for i := 0; i < n; i++ {
-		data[i] = rand.Int()
+		a[i] = rand.Int()
 	}
-	return data
+	return a
 }
 
 func TestHeapSort(t *testing.T) {
-	data := randArray(1024)
-	data = heapSort(data)
-	if !sort.IntsAreSorted(data) {
+	a := randArray(1024)
+	heapSort(a)
+	if !sort.IntsAreSorted(a) {
 		t.Fail()
 	}
 }
 
 func BenchmarkHeapSortRnd(b *testing.B) {
 	n := 1024
-	orig := randArray(n)
-	data := make([]int, n)
+	a := randArray(n)
+	c := make([]int, n)
 	for i := 0; i < b.N; i++ {
-		copy(data, orig)
-		heapSort(data)
+		copy(c, a)
+		heapSort(c)
 	}
 }
 
 func BenchmarkStandartSortRnd(b *testing.B) {
 	n := 1024
-	orig := randArray(n)
-	data := make([]int, n)
+	a := randArray(n)
+	c := make([]int, n)
 	for i := 0; i < b.N; i++ {
-		copy(data, orig)
-		sort.Ints(data)
+		copy(c, a)
+		sort.Ints(c)
 	}
 }

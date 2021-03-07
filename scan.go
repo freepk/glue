@@ -1,18 +1,5 @@
 package main
 
-func isEqual(a, b []int) bool {
-	size := len(a)
-	if size != len(b) {
-		return false
-	}
-	for i := 0; i < size; i++ {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
-}
-
 func scanNum(b []byte) (int, int) {
 	n := len(b)
 	i := 0

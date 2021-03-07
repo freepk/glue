@@ -1,36 +1,34 @@
 package main
 
-func heapSort(a []int) []int {
-	heapify(a)
-	for i := len(a) - 1; i > 0; i-- {
+func heapSort(a []int) {
+	n := len(a)
+	i := (n - 1) / 2
+	for i >= 0 {
+		siftDown(a, i, n)
+		i--
+	}
+	i = (n - 1)
+	for i > 0 {
 		a[0], a[i] = a[i], a[0]
 		siftDown(a, 0, i)
-	}
-	return a
-}
-
-func heapify(a []int) {
-	n := len(a)
-	for i := (n - 1) / 2; i >= 0; i-- {
-		siftDown(a, i, n)
+		i--
 	}
 }
 
-func siftDown(h []int, lo, hi int) {
-	r := lo
-	for {
-		c := (r * 2) + 1
-		if c >= hi {
+func siftDown(a []int, i, n int) {
+	j := (i * 2) + 1
+	k := (j + 1)
+	for j < n {
+		if (k < n) && (a[j] < a[k]) {
+			j++
+			k++
+		}
+		if a[i] >= a[j] {
 			break
 		}
-		if ((c + 1) < hi) && (h[c] < h[c+1]) {
-			c++
-		}
-		if h[r] < h[c] {
-			h[r], h[c] = h[c], h[r]
-			r = c
-		} else {
-			break
-		}
+		a[i], a[j] = a[j], a[i]
+		i = j
+		j = (i * 2) + 1
+		k = (j + 1)
 	}
 }

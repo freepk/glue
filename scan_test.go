@@ -4,19 +4,17 @@ import (
 	"testing"
 )
 
-func TestIsEqual(t *testing.T) {
-	if !isEqual([]int{}, []int{}) {
-		t.Fail()
+func isEqual(a, b []int) bool {
+	size := len(a)
+	if size != len(b) {
+		return false
 	}
-	if !isEqual([]int{1, 2, 3, 4}, []int{1, 2, 3, 4}) {
-		t.Fail()
+	for i := 0; i < size; i++ {
+		if a[i] != b[i] {
+			return false
+		}
 	}
-	if isEqual([]int{}, []int{1}) {
-		t.Fail()
-	}
-	if isEqual([]int{1}, []int{2}) {
-		t.Fail()
-	}
+	return true
 }
 
 func TestScanNum(t *testing.T) {
