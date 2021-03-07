@@ -16,10 +16,10 @@ func heapSort(a []int) {
 }
 
 func siftDown(a []int, i, n int) {
-	j := i*2 + 1
+	j := (i * 2) + 1
 	k := j + 1
 	for j < n {
-		if j+1 < n {
+		if k < n {
 			if a[j] < a[k] {
 				j++
 				k++
@@ -30,7 +30,7 @@ func siftDown(a []int, i, n int) {
 		}
 		a[i], a[j] = a[j], a[i]
 		i = j
-		j = i*2 + 1
+		j = (i * 2) + 1
 		k = j + 1
 	}
 }
