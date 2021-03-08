@@ -5,16 +5,29 @@ import (
 )
 
 const (
-	inArgName   = `nm`
-	outArgName  = `product`
+	srcArgName  = `nm`
+	dstArgName  = `product`
 	servicePort = `:8080`
 )
 
-func partHost(n int) []byte {
-	buf := make([]byte, 0, 256)
+func appendHost(buf []byte, part int) []byte {
 	buf = append(buf, `catalog-backend-part`...)
-	buf = appendUint(buf, n)
+	buf = appendUint(buf, part)
 	buf = append(buf, `.wbx-ru.svc.k8s.dataline`...)
+	return buf
+}
+
+func appendPath(buf, path []byte) []byte {
+	return append(buf, path...)
+}
+
+func appendArgs(buf []byte, args *fasthttp.Args) []byte {
+	args.VisitAll(func(k, v []byte) {
+		buf = append(buf, k...)
+		buf = append(buf, '=')
+		buf = append(buf, v...)
+		buf = append(buf, '&')
+	})
 	return buf
 }
 
@@ -24,8 +37,7 @@ func partNum(n int) int {
 
 func serviceHandler(ctx *fasthttp.RequestCtx) {
 	args := ctx.QueryArgs()
-	buf := args.Peek(inArgName)
-	args.Del(inArgName)
+	buf := args.Peek(srcArgName)
 	if len(buf) == 0 {
 		return
 	}
@@ -41,21 +53,15 @@ func serviceHandler(ctx *fasthttp.RequestCtx) {
 		parts = append(parts, partNum(items[i]))
 	}
 	parts = dedupInts(parts)
-	buf = buf[:0]
-	args.VisitAll(func(k, v []byte) {
-		buf = append(buf, k...)
-		buf = append(buf, '=')
-		buf = append(buf, v...)
-		buf = append(buf, '&')
-	})
-	buf = append(buf, outArgName...)
-	buf = append(buf, '=')
+	args.Del(srcArgName)
 	i := 0
 	for p := 0; p < len(parts); p++ {
-		tmp := buf
+		buf = buf[:0]
+		buf = appendHost(buf, parts[p])
+		buf = appendPath(buf, ctx.Path())
+		buf = appendArgs(buf, args)
 		for i < len(items) && partNum(items[i]) == parts[p] {
-			tmp = appendUint(tmp, items[i])
-			tmp = append(tmp, 0x3b)
+			buf = appendUint(buf, items[i])
 			i++
 		}
 	}
