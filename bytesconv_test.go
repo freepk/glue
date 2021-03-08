@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func isIntsEqual(a, b []int) bool {
+func intsEq(a, b []int) bool {
 	n := len(a)
 	if n != len(b) {
 		return false
@@ -17,7 +17,7 @@ func isIntsEqual(a, b []int) bool {
 	return true
 }
 
-func isBytesEqual(a, b []byte) bool {
+func bytesEq(a, b []byte) bool {
 	n := len(a)
 	if n != len(b) {
 		return false
@@ -56,13 +56,13 @@ func TestParseUint(t *testing.T) {
 }
 
 func TestAppendUint(t *testing.T) {
-	if !isBytesEqual(appendUint(nil, 0), []byte("0")) {
+	if !bytesEq(appendUint(nil, 0), []byte("0")) {
 		t.Fail()
 	}
-	if !isBytesEqual(appendUint(nil, 10), []byte("10")) {
+	if !bytesEq(appendUint(nil, 10), []byte("10")) {
 		t.Fail()
 	}
-	if !isBytesEqual(appendUint(nil, 1234), []byte("1234")) {
+	if !bytesEq(appendUint(nil, 1234), []byte("1234")) {
 		t.Fail()
 	}
 }
@@ -80,25 +80,25 @@ func TestParseUints(t *testing.T) {
 	if _, n := parseUints(nil, []byte(";;;")); n != 3 {
 		t.Fail()
 	}
-	if r, n := parseUints(nil, []byte("1234")); n != 4 || !isIntsEqual(r, []int{1234}) {
+	if r, n := parseUints(nil, []byte("1234")); n != 4 || !intsEq(r, []int{1234}) {
 		t.Fail()
 	}
-	if r, n := parseUints(nil, []byte("1234;")); n != 5 || !isIntsEqual(r, []int{1234}) {
+	if r, n := parseUints(nil, []byte("1234;")); n != 5 || !intsEq(r, []int{1234}) {
 		t.Fail()
 	}
-	if r, n := parseUints(nil, []byte("1234;5678")); n != 9 || !isIntsEqual(r, []int{1234, 5678}) {
+	if r, n := parseUints(nil, []byte("1234;5678")); n != 9 || !intsEq(r, []int{1234, 5678}) {
 		t.Fail()
 	}
 }
 
 func TestDedupInts(t *testing.T) {
-	if !isIntsEqual(dedupInts([]int{}), []int{}) {
+	if !intsEq(dedupInts([]int{}), []int{}) {
 		t.Fail()
 	}
-	if !isIntsEqual(dedupInts([]int{1, 1}), []int{1}) {
+	if !intsEq(dedupInts([]int{1, 1}), []int{1}) {
 		t.Fail()
 	}
-	if !isIntsEqual(dedupInts([]int{1, 2, 2, 3, 4, 4, 4}), []int{1, 2, 3, 4}) {
+	if !intsEq(dedupInts([]int{1, 2, 2, 3, 4, 4, 4}), []int{1, 2, 3, 4}) {
 		t.Log(dedupInts([]int{1, 2, 2, 3, 4, 4, 4}))
 		t.Fail()
 	}
