@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/valyala/fasthttp"
-	"log"
 )
 
 const (
@@ -59,7 +58,6 @@ func serviceHandler(ctx *fasthttp.RequestCtx) {
 			tmp = append(tmp, 0x3b)
 			i++
 		}
-		log.Println(string(tmp))
 	}
 }
 
