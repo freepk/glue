@@ -40,3 +40,14 @@ func BenchmarkRequests(b *testing.B) {
 		w.release()
 	}
 }
+
+func BenchmarkRequestsRemote(b *testing.B) {
+	go fasthttp.ListenAndServe(samplePort, sampleHandler)
+	buf := make([]byte, 0, 1024)
+	for i := 0; i < b.N; i++ {
+		buf = buf[:0]
+		w := defaultPool.acquire()
+		w.run(buf, sampleUrlsRemote)
+		w.release()
+	}
+}
