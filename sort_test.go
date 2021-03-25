@@ -37,7 +37,7 @@ func BenchmarkHeapSortRnd(b *testing.B) {
 	}
 }
 
-func BenchmarkStandartSortRnd(b *testing.B) {
+func BenchmarkStandardSortRnd(b *testing.B) {
 	n := 1024
 	a := randArray(n)
 	c := make([]int, n)
