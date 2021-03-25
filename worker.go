@@ -49,7 +49,7 @@ func newWorkerPool(n int) *workerPool {
 	return p
 }
 
-func (p *workerPool) acqure() *worker {
+func (p *workerPool) acquire() *worker {
 	w := <-p.workers
 	w.reset()
 	return w
