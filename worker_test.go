@@ -6,6 +6,7 @@ import (
 
 func TestWorkerPool(t *testing.T) {
 	p := newWorkerPool(4)
+
 	w0 := p.acquire()
 	w1 := p.acquire()
 	w2 := p.acquire()
@@ -22,4 +23,8 @@ func TestWorkerPool(t *testing.T) {
 	w1.release()
 	w2.release()
 	w3.release()
+}
+
+func TestWorkerPool128(t *testing.T) {
+	newWorkerPool(128)
 }

@@ -2,11 +2,7 @@ package main
 
 import "github.com/valyala/fasthttp"
 
-var defaultPool *workerPool
-
-func init() {
-	defaultPool = newWorkerPool(64)
-}
+var defaultPool = newWorkerPool(64)
 
 type worker struct {
 	count int
@@ -29,7 +25,7 @@ func (w *worker) reset() {
 }
 
 func (w *worker) run() {
-	println(`run worker`)
+	println(`run()`)
 }
 
 func (w *worker) release() {
