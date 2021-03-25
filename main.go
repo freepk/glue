@@ -37,7 +37,7 @@ var sampleUrls = []string{
 
 func serviceHandler(ctx *fasthttp.RequestCtx) {
 	w := defaultPool.acquire()
-	w.run()
+	w.run(16)
 	w.release()
 	ctx.WriteString(`Done!`)
 }

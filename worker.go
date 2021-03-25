@@ -24,8 +24,18 @@ func (w *worker) reset() {
 	w.rs = w.rs[:0]
 }
 
-func (w *worker) run() {
-	println(`run()`)
+func (w *worker) run(n int) {
+	for i := 0; i < n; i++ {
+		w.rq = append(w.rq, fasthttp.AcquireRequest())
+		w.rs = append(w.rs, fasthttp.AcquireResponse())
+	}
+
+	// Some logic
+
+	for i := 0; i < n; i++ {
+		fasthttp.ReleaseRequest(w.rq[i])
+		fasthttp.ReleaseResponse(w.rs[i])
+	}
 }
 
 func (w *worker) release() {
