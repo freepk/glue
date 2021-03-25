@@ -40,7 +40,7 @@ func newWorkerPool(n int) *workerPool {
 	p := new(workerPool)
 	p.workers = make(chan *worker, n)
 	for i := 0; i < n; i++ {
-		p.workers <- newWorker(p)
+		newWorker(p)
 	}
 	return p
 }
