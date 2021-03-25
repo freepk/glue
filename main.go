@@ -28,9 +28,9 @@ func sampleHandler(ctx *fasthttp.RequestCtx) {
 func serviceHandler(ctx *fasthttp.RequestCtx) {
 	w := defaultPool.acquire()
 	defer w.release()
-	buf := ctx.Response.Body()
-	buf = w.run(buf, sampleUrls)
-	ctx.SetBody(buf)
+	body := ctx.Response.Body()
+	body = w.run(body, sampleUrls)
+	ctx.SetBody(body)
 }
 
 func main() {

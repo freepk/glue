@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/valyala/fasthttp"
 	"testing"
 )
 
@@ -27,4 +28,15 @@ func TestWorkerPool(t *testing.T) {
 
 func TestWorkerPool128(t *testing.T) {
 	newWorkerPool(128)
+}
+
+func BenchmarkRequests(b *testing.B) {
+	go fasthttp.ListenAndServe(samplePort, sampleHandler)
+	buf := make([]byte, 0, 1024)
+	for i := 0; i < b.N; i++ {
+		buf = buf[:0]
+		w := defaultPool.acquire()
+		w.run(buf, sampleUrls)
+		w.release()
+	}
 }
