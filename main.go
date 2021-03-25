@@ -9,7 +9,8 @@ const (
 	servicePort = `:8081`
 )
 
-var defaultPool = newWorkerPool(128)
+var defaultPool = newWorkerPool(256)
+
 var sampleUrls = []string{
 	`http://localhost:8080/`,
 	`http://localhost:8080/`,
