@@ -5,6 +5,11 @@ import (
 	"sync"
 )
 
+var client = &fasthttp.Client{
+	ReadBufferSize:  1 << 14,
+	WriteBufferSize: 1 << 14,
+}
+
 type request struct {
 	req *fasthttp.Request
 	res *fasthttp.Response
@@ -35,7 +40,7 @@ func newWorker(p *workerPool) *worker {
 func doWithDone(r *request, join *sync.WaitGroup, url string) {
 	defer join.Done()
 	r.req.SetRequestURI(url)
-	fasthttp.Do(r.req, r.res)
+	client.Do(r.req, r.res)
 }
 
 func (w *worker) run(buf []byte, urls []string) []byte {
