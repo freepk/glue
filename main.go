@@ -9,8 +9,17 @@ const (
 	servicePort = `:8081`
 )
 
-// optimize pool size with connection pool size
 var defaultPool = newWorkerPool(128)
+var sampleUrls = []string{
+	`http://localhost:8080/`,
+	`http://localhost:8080/`,
+	`http://localhost:8080/`,
+	`http://localhost:8080/`,
+	`http://localhost:8080/`,
+	`http://localhost:8080/`,
+	`http://localhost:8080/`,
+	`http://localhost:8080/`,
+}
 
 func sampleHandler(ctx *fasthttp.RequestCtx) {
 	ctx.WriteString(`{}`)
@@ -19,17 +28,9 @@ func sampleHandler(ctx *fasthttp.RequestCtx) {
 func serviceHandler(ctx *fasthttp.RequestCtx) {
 	w := defaultPool.acquire()
 	defer w.release()
-	buf := w.run(nil, []string{
-		`http://localhost:8080/`,
-		`http://localhost:8080/`,
-		`http://localhost:8080/`,
-		`http://localhost:8080/`,
-		`http://localhost:8080/`,
-		`http://localhost:8080/`,
-		`http://localhost:8080/`,
-		`http://localhost:8080/`,
-	})
-	ctx.Write(buf)
+	buf := ctx.Response.Body()
+	buf = w.run(buf, sampleUrls)
+	ctx.SetBody(buf)
 }
 
 func main() {
