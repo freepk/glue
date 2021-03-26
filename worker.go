@@ -38,7 +38,7 @@ func doWithDone(r *request, join *sync.WaitGroup, url string) {
 	fasthttp.Do(r.req, r.res)
 }
 
-func (w *worker) run(buf []byte, urls []string) []byte {
+func (w *worker) doAsync(buf []byte, urls []string) []byte {
 	n := len(urls)
 	w.join.Add(n)
 	for i := 0; i < n; i++ {
@@ -54,6 +54,21 @@ func (w *worker) run(buf []byte, urls []string) []byte {
 		fasthttp.ReleaseRequest(r.req)
 		fasthttp.ReleaseResponse(r.res)
 	}
+	return buf
+}
+
+func (w *worker) doSync(buf []byte, urls []string) []byte {
+	n := len(urls)
+	w.join.Add(n)
+	req := fasthttp.AcquireRequest()
+	res := fasthttp.AcquireResponse()
+	for i := 0; i < n; i++ {
+		req.SetRequestURI(urls[i])
+		fasthttp.Do(req, res)
+		buf = append(buf, res.Body()...)
+	}
+	fasthttp.ReleaseRequest(req)
+	fasthttp.ReleaseResponse(res)
 	return buf
 }
 

@@ -30,24 +30,24 @@ func TestWorkerPool128(t *testing.T) {
 	newWorkerPool(128)
 }
 
-func BenchmarkRequests(b *testing.B) {
+func BenchmarkAsyncRequests(b *testing.B) {
 	go fasthttp.ListenAndServe(samplePort, sampleHandler)
 	buf := make([]byte, 0, 1024)
+	w := defaultPool.acquire()
 	for i := 0; i < b.N; i++ {
 		buf = buf[:0]
-		w := defaultPool.acquire()
-		w.run(buf, sampleUrls)
-		w.release()
+		w.doAsync(buf, sampleUrls)
 	}
+	w.release()
 }
 
-func BenchmarkRequestsRemote(b *testing.B) {
+func BenchmarkSyncRequests(b *testing.B) {
 	go fasthttp.ListenAndServe(samplePort, sampleHandler)
 	buf := make([]byte, 0, 1024)
+	w := defaultPool.acquire()
 	for i := 0; i < b.N; i++ {
 		buf = buf[:0]
-		w := defaultPool.acquire()
-		w.run(buf, sampleUrlsRemote)
-		w.release()
+		w.doSync(buf, sampleUrls)
 	}
+	w.release()
 }
