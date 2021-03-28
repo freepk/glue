@@ -13,21 +13,22 @@ func newWorker(p *workerPool) *worker {
 	return w
 }
 
-func doSome() []byte {
-	return nil
+func makeHttpRequest(buf []byte, url string) []byte {
+	return buf
 }
 
-func doSomeAsync(buf []byte, out chan<- []byte) {
-	out <- doSome()
+func makeHttpRequestAsync(buf []byte, url string, out chan<- []byte) {
+	out <- makeHttpRequest(buf, url)
 }
 
 func (w *worker) doAsync(buf []byte, urls []string) []byte {
 	n := len(urls)
 	for i := 0; i < n; i++ {
-		go doSomeAsync(nil, w.join)
+		go makeHttpRequestAsync(nil, urls[i], w.join)
 	}
 	for i := 0; i < n; i++ {
-		<-w.join
+		body := <-w.join
+		buf = append(buf, body...)
 	}
 	return buf
 }
@@ -35,7 +36,8 @@ func (w *worker) doAsync(buf []byte, urls []string) []byte {
 func (w *worker) doSync(buf []byte, urls []string) []byte {
 	n := len(urls)
 	for i := 0; i < n; i++ {
-		doSome()
+		body := makeHttpRequest(nil, urls[i])
+		buf = append(buf, body...)
 	}
 	return buf
 }
