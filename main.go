@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	samplePort  = `:8080`
-	servicePort = `:8081`
+	samplePort = `:8080`
+	asyncPort  = `:8081`
+	syncPort   = `:8082`
 )
 
 var defaultPool = newWorkerPool(256)
@@ -36,7 +37,7 @@ func sampleHandler(ctx *fasthttp.RequestCtx) {
 	ctx.WriteString(`{}`)
 }
 
-func serviceHandler(ctx *fasthttp.RequestCtx) {
+func asyncHandler(ctx *fasthttp.RequestCtx) {
 	w := defaultPool.acquire()
 	defer w.release()
 	body := ctx.Response.Body()
@@ -44,7 +45,16 @@ func serviceHandler(ctx *fasthttp.RequestCtx) {
 	ctx.SetBody(body)
 }
 
+func syncHandler(ctx *fasthttp.RequestCtx) {
+	w := defaultPool.acquire()
+	defer w.release()
+	body := ctx.Response.Body()
+	body = w.doSync(body, sampleUrls)
+	ctx.SetBody(body)
+}
+
 func main() {
-	go fasthttp.ListenAndServe(samplePort, sampleHandler)
-	fasthttp.ListenAndServe(servicePort, serviceHandler)
+	go fasthttp.ListenAndServe(asyncPort, asyncHandler)
+	go fasthttp.ListenAndServe(syncPort, syncHandler)
+	fasthttp.ListenAndServe(samplePort, sampleHandler)
 }

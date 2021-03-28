@@ -10,7 +10,7 @@ func newWorker(p *workerPool) *worker {
 	w := new(worker)
 	w.pool = p
 	w.join = make(chan []byte)
-	w.data = make([][]byte, 64)
+	w.data = make([][]byte, 256)
 	p.workers <- w
 	return w
 }
@@ -30,7 +30,8 @@ func (w *worker) doAsync(buf []byte, urls []string) []byte {
 func (w *worker) doSync(buf []byte, urls []string) []byte {
 	n := len(urls)
 	for i := 0; i < n; i++ {
-		buf = makeHttpRequest(buf, urls[i])
+		w.data[i] = makeHttpRequest(w.data[i][:0], urls[i])
+		buf = append(buf, w.data[i]...)
 	}
 	return buf
 }
