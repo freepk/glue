@@ -1,9 +1,5 @@
 package main
 
-import (
-	"github.com/valyala/fasthttp"
-)
-
 type worker struct {
 	pool *workerPool
 	join chan []byte
@@ -17,15 +13,6 @@ func newWorker(p *workerPool) *worker {
 	w.data = make([][]byte, 64)
 	p.workers <- w
 	return w
-}
-
-func makeHttpRequest(buf []byte, url string) []byte {
-	_, buf, _ = fasthttp.Get(buf, url)
-	return buf
-}
-
-func makeHttpRequestAsync(buf []byte, url string, join chan<- []byte) {
-	join <- makeHttpRequest(buf, url)
 }
 
 func (w *worker) doAsync(buf []byte, urls []string) []byte {
