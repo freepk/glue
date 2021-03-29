@@ -1,12 +1,21 @@
 package main
 
+const (
+	dotChar       = 0x2e
+	equalSignChar = 0x3d
+	questMarkChar = 0x3f
+	semicolonChar = 0x3b
+	zeroChar      = 0x30
+	ampersandChar = 0x26
+)
+
 func parseUint(b []byte) (int, int) {
 	n := len(b)
 	i := 0
 	r := 0
 	c := byte(0)
 	for i < n {
-		c = b[i] - 0x30
+		c = b[i] - zeroChar
 		if c > 9 {
 			break
 		}
@@ -26,10 +35,10 @@ func appendUint(r []byte, n int) []byte {
 		m = n
 		n = n / 10
 		m -= n * 10
-		b[i] = byte(m + 0x30)
+		b[i] = byte(m + zeroChar)
 	}
 	i--
-	b[i] = byte(n + 0x30)
+	b[i] = byte(n + zeroChar)
 	r = append(r, b[i:]...)
 	return r
 }
@@ -38,7 +47,7 @@ func parseUints(r []int, b []byte) ([]int, int) {
 	n := len(b)
 	i := 0
 	for i < n {
-		if b[i] == 0x3b {
+		if b[i] == semicolonChar {
 			i++
 			continue
 		}
