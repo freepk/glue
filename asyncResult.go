@@ -42,7 +42,7 @@ func (ar *asyncResult) newTask() *asyncTask {
 }
 
 func (ar *asyncResult) runTask(i int) {
-	at := ar.tasks[i]
+	at := &ar.tasks[i]
 	at.output = ar.call(at.output[:0], at.input)
 	ar.done <- at.output
 }
