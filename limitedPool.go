@@ -1,22 +1,22 @@
 package main
 
 type limitedPool struct {
-	ch chan interface{}
+	queue chan interface{}
 }
 
-func newLimitedPool(fn func() interface{}, limit int) *limitedPool {
+func newLimitedPool(newFunc func() interface{}, limit int) *limitedPool {
 	p := new(limitedPool)
-	p.ch = make(chan interface{}, limit)
+	p.queue = make(chan interface{}, limit)
 	for i := 0; i < limit; i++ {
-		p.ch <- fn()
+		p.queue <- newFunc()
 	}
 	return p
 }
 
 func (p *limitedPool) get() interface{} {
-	return <-p.ch
+	return <-p.queue
 }
 
-func (p *limitedPool) put(i interface{}) {
-	p.ch <- i
+func (p *limitedPool) put(elem interface{}) {
+	p.queue <- elem
 }
