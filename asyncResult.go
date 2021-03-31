@@ -5,12 +5,12 @@ type asyncTask struct {
 	output []byte
 }
 
-func (at *asyncTask) getInput() []byte {
-	return at.input
+func (at *asyncTask) resetInput() []byte {
+	return at.input[:0]
 }
 
-func (at *asyncTask) setInput(input []byte) {
-	at.input = input
+func (at *asyncTask) appendInput(input []byte) {
+	at.input = append(at.input[:0], input...)
 }
 
 type asyncResult struct {
