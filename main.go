@@ -19,22 +19,26 @@ const (
 	remoteCatalogPath = `/catalog`
 	remoteBasketPath  = `/basket`
 	remoteProductsArg = `product`
+	remoteShardPrefix = `catalog-backend.part`
 )
 
 type productResult struct {
-	wait      *sync.WaitGroup
+	join      *sync.WaitGroup
+	service   *productService
 	baseQuery []byte
 	products  []int
 }
 
-func newProductResult() *productResult {
-	return &productResult{
-		wait: &sync.WaitGroup{},
-	}
+func newProductResult(service *productService) *productResult {
+	result := new(productResult)
+	result.service = service
+	result.join = new(sync.WaitGroup)
+	return result
 }
 
 func (pr *productResult) setBaseQuery(path, args string) {
-	pr.baseQuery = append(pr.baseQuery[:0], path...)
+	pr.baseQuery = pr.baseQuery[:0]
+	pr.baseQuery = append(pr.baseQuery, path...)
 	pr.baseQuery = append(pr.baseQuery, questMarkChar)
 	pr.baseQuery = append(pr.baseQuery, args...)
 }
@@ -45,50 +49,84 @@ func (pr *productResult) setProductBytes(buf []byte) {
 	pr.products = dedupInts(pr.products)
 }
 
-func (pr *productResult) requestByShard(shard int, products []int) {
-	defer pr.wait.Done()
-	//fmt.Println(shard, string(pr.baseQuery), products)
+func (pr *productResult) buildRequestURI(buf []byte, shard int, products []int) []byte {
+	buf = pr.service.shardHost(buf, shard)
+	buf = append(buf, pr.baseQuery...)
+	buf = append(buf, ampersandChar)
+	buf = append(buf, remoteProductsArg...)
+	buf = append(buf, equalSignChar)
+	for i := 0; i < len(products); i++ {
+		buf = appendUint(buf, products[i])
+		buf = append(buf, semicolonChar)
+	}
+	return buf
 }
 
-func (pr *productResult) dispatch() {
-	n := len(pr.products)
+func (pr *productResult) requestByShard(shard int, products []int) {
+
+	defer pr.join.Done()
+
+	requestURI := make([]byte, 0, 1024)
+	requestURI = pr.buildRequestURI(requestURI, shard, products)
+
+	// fmt.Println(string(buf))
+
+}
+
+func (pr *productResult) dispatchRequests() {
+
 	i := 0
 	j := 0
-	for i < n {
+
+	for i < len(pr.products) {
 		j = i
 		shard := productShard(pr.products[i])
-		for j < n {
+		for j < len(pr.products) {
 			if shard != productShard(pr.products[j]) {
 				break
 			}
 			j++
 		}
-		pr.wait.Add(1)
+		pr.join.Add(1)
 		go pr.requestByShard(shard, pr.products[i:j])
 		i = j
 	}
+
 }
 
 func (pr *productResult) request(path, args string, products []byte) {
 	pr.setBaseQuery(path, args)
 	pr.setProductBytes(products)
-	pr.dispatch()
-	pr.wait.Wait()
+	pr.dispatchRequests()
+	pr.join.Wait()
 }
 
 type productService struct {
-	shardURLs  []string
 	resultPool *sync.Pool
+	baseHost   []byte
 }
 
-func newProductService() *productService {
-	return &productService{
-		resultPool: &sync.Pool{
-			New: func() interface{} {
-				return newProductResult()
-			},
-		},
+func newProductService(baseHost string) *productService {
+	service := new(productService)
+	resultPool := new(sync.Pool)
+	resultPool.New = func() interface{} {
+		return newProductResult(service)
 	}
+	service.resultPool = resultPool
+	service.setBaseHost(baseHost)
+	return service
+}
+
+func (svc *productService) setBaseHost(baseHost string) {
+	svc.baseHost = append(svc.baseHost[:0], baseHost...)
+}
+
+func (svc *productService) shardHost(buf []byte, shard int) []byte {
+	buf = append(buf, remoteShardPrefix...)
+	buf = appendUint(buf, shard)
+	buf = append(buf, dotChar)
+	buf = append(buf, svc.baseHost...)
+	return buf
 }
 
 func productShard(i int) int {
@@ -109,21 +147,24 @@ func (svc *productService) handleProducts(ctx *fasthttp.RequestCtx, remotePath s
 }
 
 func main() {
-	svc := newProductService()
+	baseHost := `wbx-ru.svc.k8s.dataline`
+	addr := `:8080`
+
+	service := newProductService(baseHost)
 	handler := func(ctx *fasthttp.RequestCtx) {
 		if ctx.IsGet() {
 			switch string(ctx.Path()) {
 			case catalogPath, remoteCatalogPath:
-				svc.handleProducts(ctx, remoteCatalogPath)
+				service.handleProducts(ctx, remoteCatalogPath)
 			case basketPath, remoteBasketPath:
-				svc.handleProducts(ctx, remoteBasketPath)
+				service.handleProducts(ctx, remoteBasketPath)
 			case filtersPath:
 			case metricsPath:
 			case statePath:
 			}
 		}
 	}
-	addr := `:8080`
+
 	if err := fasthttp.ListenAndServe(addr, handler); err != nil {
 		log.Fatal(err)
 	}
