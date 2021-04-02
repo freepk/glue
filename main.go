@@ -22,8 +22,9 @@ const (
 )
 
 type productResult struct {
-	wait     *sync.WaitGroup
-	products []int
+	wait      *sync.WaitGroup
+	baseQuery []byte
+	products  []int
 }
 
 func newProductResult() *productResult {
@@ -32,18 +33,24 @@ func newProductResult() *productResult {
 	}
 }
 
+func (pr *productResult) setBaseQuery(path, args string) {
+	pr.baseQuery = append(pr.baseQuery[:0], path...)
+	pr.baseQuery = append(pr.baseQuery, questMarkChar)
+	pr.baseQuery = append(pr.baseQuery, args...)
+}
+
 func (pr *productResult) setProductBytes(buf []byte) {
 	pr.products, _ = parseUints(pr.products[:0], buf)
 	heapSort(pr.products)
 	pr.products = dedupInts(pr.products)
 }
 
-func (pr *productResult) requestShardProducts(shard int, products []int) {
+func (pr *productResult) requestByShard(shard int, products []int) {
 	defer pr.wait.Done()
-	// fmt.Println(shard, products)
+	//fmt.Println(shard, string(pr.baseQuery), products)
 }
 
-func (pr *productResult) requestProducts() {
+func (pr *productResult) dispatch() {
 	n := len(pr.products)
 	i := 0
 	j := 0
@@ -57,9 +64,15 @@ func (pr *productResult) requestProducts() {
 			j++
 		}
 		pr.wait.Add(1)
-		go pr.requestShardProducts(shard, pr.products[i:j])
+		go pr.requestByShard(shard, pr.products[i:j])
 		i = j
 	}
+}
+
+func (pr *productResult) request(path, args string, products []byte) {
+	pr.setBaseQuery(path, args)
+	pr.setProductBytes(products)
+	pr.dispatch()
 	pr.wait.Wait()
 }
 
@@ -68,7 +81,7 @@ type productService struct {
 	resultPool *sync.Pool
 }
 
-func newService() *productService {
+func newProductService() *productService {
 	return &productService{
 		resultPool: &sync.Pool{
 			New: func() interface{} {
@@ -87,13 +100,16 @@ func (svc *productService) handleProducts(ctx *fasthttp.RequestCtx, remotePath s
 	result := svc.resultPool.Get().(*productResult)
 	defer svc.resultPool.Put(result)
 
-	result.setProductBytes(ctx.QueryArgs().Peek(productsArg))
-	result.requestProducts()
+	args := ctx.QueryArgs()
+	products := args.Peek(productsArg)
+	args.Del(productsArg)
+
+	result.request(remotePath, args.String(), products)
 
 }
 
 func main() {
-	svc := newService()
+	svc := newProductService()
 	handler := func(ctx *fasthttp.RequestCtx) {
 		if ctx.IsGet() {
 			switch string(ctx.Path()) {
