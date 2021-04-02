@@ -19,7 +19,7 @@ const (
 	remoteCatalogPath = `/catalog`
 	remoteBasketPath  = `/basket`
 	remoteProductsArg = `product`
-	remoteShardPrefix = `catalog-backend.part`
+	remoteShardPrefix = `http://catalog-backend-part`
 )
 
 type productResult struct {
@@ -69,8 +69,16 @@ func (pr *productResult) requestByShard(shard int, products []int) {
 	requestURI := make([]byte, 0, 1024)
 	requestURI = pr.buildRequestURI(requestURI, shard, products)
 
-	// fmt.Println(string(buf))
+	req := fasthttp.AcquireRequest()
+	req.SetRequestURIBytes(requestURI)
+	resp := fasthttp.AcquireResponse()
 
+	if err := fasthttp.Do(req, resp); err != nil {
+		log.Println(err)
+	}
+
+	fasthttp.ReleaseRequest(req)
+	fasthttp.ReleaseResponse(resp)
 }
 
 func (pr *productResult) dispatchRequests() {
