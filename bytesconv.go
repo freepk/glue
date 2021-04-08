@@ -80,14 +80,13 @@ func dedupInts(r []int) []int {
 }
 
 func splitByFunc(r [][]int, a []int, fn func(int) int) [][]int {
-
+	n := len(a)
 	i := 0
 	j := 0
-
-	for i < len(a) {
+	for i < n {
 		j = i
 		p := fn(a[i])
-		for j < len(a) {
+		for j < n {
 			if p != fn(a[j]) {
 				break
 			}
@@ -96,6 +95,5 @@ func splitByFunc(r [][]int, a []int, fn func(int) int) [][]int {
 		r = append(r, a[i:j])
 		i = j
 	}
-
 	return r
 }
