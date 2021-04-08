@@ -78,3 +78,24 @@ func dedupInts(r []int) []int {
 	i++
 	return r[:i]
 }
+
+func splitByFunc(r [][]int, a []int, fn func(int) int) [][]int {
+
+	i := 0
+	j := 0
+
+	for i < len(a) {
+		j = i
+		p := fn(a[i])
+		for j < len(a) {
+			if p != fn(a[j]) {
+				break
+			}
+			j++
+		}
+		r = append(r, a[i:j])
+		i = j
+	}
+
+	return r
+}
