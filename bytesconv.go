@@ -1,14 +1,5 @@
 package main
 
-const (
-	ampersandChar = 0x26
-	dotChar       = 0x2e
-	zeroChar      = 0x30
-	semicolonChar = 0x3b
-	equalSignChar = 0x3d
-	questMarkChar = 0x3f
-)
-
 func parseUint(b []byte) (int, int) {
 	n := len(b)
 	i := 0
@@ -59,41 +50,4 @@ func parseUints(r []int, b []byte) ([]int, int) {
 		i += j
 	}
 	return r, i
-}
-
-func dedupInts(r []int) []int {
-	n := len(r)
-	if n < 2 {
-		return r
-	}
-	i := 0
-	j := 1
-	for j < n {
-		if r[i] != r[j] {
-			i++
-			r[i] = r[j]
-		}
-		j++
-	}
-	i++
-	return r[:i]
-}
-
-func splitByFunc(r [][]int, a []int, fn func(int) int) [][]int {
-	n := len(a)
-	i := 0
-	j := 0
-	for i < n {
-		j = i
-		p := fn(a[i])
-		for j < n {
-			if p != fn(a[j]) {
-				break
-			}
-			j++
-		}
-		r = append(r, a[i:j])
-		i = j
-	}
-	return r
 }
